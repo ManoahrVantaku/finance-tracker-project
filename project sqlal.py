@@ -2,44 +2,44 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 # ----- DATABASE SETUP -----
-engine = create_engine("sqlite:///fintrack.db")
-Base = declarative_base()
-Session = sessionmaker(bind=engine)
-session = Session()
+engine = create_engine("sqlite:///fintrack.db") #database file
+Base = declarative_base()   #parent class
+Session = sessionmaker(bind=engine) 
+session = Session() #actual database session
 
 # ----- TABLES -----
 
-class Category(Base):
-    __tablename__ = "categories"
-    id = Column(Integer, primary_key=True)
+class Category(Base):   #table
+    __tablename__ = "categories" 
+    id = Column(Integer, primary_key=True)  
     name = Column(String)
 
-    expenses = relationship("Expense", back_populates="category")
+    expenses = relationship("Expense", back_populates="category")  #links category
 
-class Expense(Base):
+class Expense(Base):  #table
     __tablename__ = "expenses"
     id = Column(Integer, primary_key=True)
     title = Column(String)
     amount = Column(Float)
     date = Column(String)
 
-    category_id = Column(Integer, ForeignKey("categories.id"))
+    category_id = Column(Integer, ForeignKey("categories.id"))  #category id links to category table
     category = relationship("Category", back_populates="expenses")
 
-class Budget(Base):
+class Budget(Base):  #table
     __tablename__ = "budgets"
     id = Column(Integer, primary_key=True)
     month = Column(String)
     limit = Column(Float)
 
-Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)  #creates all tables in database
 
 # ----- FUNCTIONS -----
 
-def add_category():
+def add_category(): #new category
     name = input("Category name: ")
     session.add(Category(name=name))
-    session.commit()
+    session.commit()  
     print("Category added")
 
 def add_expense():
@@ -48,19 +48,19 @@ def add_expense():
     date = input("Date (YYYY-MM-DD): ")
     cat_id = int(input("Category ID: "))
 
-    session.add(Expense(title=title, amount=amount, date=date, category_id=cat_id))
+    session.add(Expense(title=title, amount=amount, date=date, category_id=cat_id)) #create expense object
     session.commit()
     print("Expense added")
 
 def show_expenses():
-    expenses = session.query(Expense).all()
-    for e in expenses:
-        print(e.id, e.title, e.amount, e.date)
+    expenses = session.query(Expense).all() #expense records
+    for e in expenses:  #loop each expense
+        print(e.id, e.title, e.amount, e.date) #display
 
 def set_budget():
     month = input("Month (YYYY-MM): ")
     limit = float(input("Limit: "))
-    session.add(Budget(month=month, limit=limit))
+    session.add(Budget(month=month, limit=limit)) #budget object
     session.commit()
     print("Budget saved")
 
@@ -68,7 +68,7 @@ def check_budget():
     month = input("Month (YYYY-MM): ")
     budget = session.query(Budget).filter_by(month=month).first()
 
-    if not budget:
+    if not budget: #budget doesn't exists
         print("No budget found")
         return
 
@@ -80,14 +80,14 @@ def check_budget():
     print("Spent:", total)
     print("Limit:", budget.limit)
 
-    if total > budget.limit:
+    if total > budget.limit:   #check over budget
         print(" Budget exceeded")
     else:
         print("Within budget")
 
 # ----- MENU -----
 
-def menu():
+def menu():  #menu control function
     while True:
         print("""
 1. Add Category
@@ -98,7 +98,7 @@ def menu():
 6. Exit
         """)
 
-        choice = input("Choice: ")
+        choice = input("Choice: ")  #user choice
 
         if choice == "1":
             add_category()
